@@ -32,6 +32,7 @@ bondCounter.Parent = frame
 local collected = 0
 statusText.Text = "Collecting Bonds..."
 
+-- Function to get all bond parts in the workspace
 function getBondParts()
     local bonds = {}
     for _, bond in pairs(workspace:GetDescendants()) do
@@ -42,21 +43,33 @@ function getBondParts()
     return bonds
 end
 
+-- Function to collect the bonds
 function collectBonds()
-    local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
+    local char = game.Players.LocalPlayer.Character
+    if not char then
+        game.Players.LocalPlayer.CharacterAdded:Wait()
+        char = game.Players.LocalPlayer.Character
+    end
 
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    if not hrp then
+        statusText.Text = "HumanoidRootPart not found!"
+        return
+    end
+
+    -- Go through each bond and teleport to it
     for _, bond in ipairs(getBondParts()) do
         if bond and bond.Parent then
             statusText.Text = "Collecting Bond at: " .. tostring(bond.Position)
-            hrp.CFrame = CFrame.new(bond.Position + Vector3.new(0, 3, 0))
-            task.wait(0.4)
+            hrp.CFrame = CFrame.new(bond.Position + Vector3.new(0, 3, 0))  -- Adjust height to avoid collision
+            task.wait(0.4)  -- Small delay to simulate movement
             collected += 1
             bondCounter.Text = "Bonds Collected: " .. collected
         end
     end
 end
 
+-- Main loop to collect all bonds
 while true do
     local bondsLeft = #getBondParts()
     if bondsLeft > 0 then
@@ -65,5 +78,5 @@ while true do
         statusText.Text = "All Bonds Collected! Script Finished."
         break
     end
-    task.wait(1)
+    task.wait(1)  -- Wait before checking again
 end
